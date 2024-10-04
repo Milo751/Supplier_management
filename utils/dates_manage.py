@@ -4,9 +4,9 @@ class DateManage():
     def __init__(self, data):
         self.data = data
 
-    def column_to_date(self, column):
-        self.data[column] = pd.to_datetime(self.data[column], errors='coerce')
-        self.data = self.data.dropna(subset=[column])
+    def column_to_date(self, date_column):
+        self.data[date_column] = pd.to_datetime(self.data[date_column], errors='coerce')
+        self.data = self.data.dropna(subset=[date_column])
         return self.data
     
     @staticmethod
@@ -15,13 +15,14 @@ class DateManage():
         return date_str
     
     @staticmethod
-    def df_to_string(df):
-        df['Effective Date-Answer'] = df['Effective Date-Answer'].dt.strftime('%d-%m-%Y')
+    def df_to_string(df, date_column):
+        df[date_column] = df[date_column].dt.strftime('%d-%m-%Y')
         df = df.rename(
             columns={
                 'Document Name-Answer':'Contrato',
                 'Effective Date-Answer':'Fecha efectiva'}
             )
+        df = df.rename_axis(index='Index')
         return df
     
 class DateInsights():

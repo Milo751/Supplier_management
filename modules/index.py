@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from main import data
+from app import data
 
 st.title('Gestión de proveedores')
 
