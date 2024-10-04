@@ -1,7 +1,9 @@
 import streamlit as st
-import pandas as pd
+from services.preprocess_data import PreprocessData
 
-data = pd.read_csv('data/master_clauses.csv')
+# Data
+preprocess = PreprocessData()
+data = preprocess.preprocess_data()
 
 pages = {
     "Inicio": [
