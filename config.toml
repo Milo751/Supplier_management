@@ -1,5 +1,0 @@
-[server]
-port = 8000
-
-[browser]
-port = 8000

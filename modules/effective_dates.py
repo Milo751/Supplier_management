@@ -23,4 +23,4 @@ col2.metric(label='Fecha efectiva más reciente' ,value=max_date, help=f'Contrat
 
 df_decorated = DateType.df_to_string(effective_dates.data, 'Effective Date')
 st.subheader('Datos')
-st.dataframe(df_decorated)
+st.dataframe(df_decorated, width=1000, height=500)

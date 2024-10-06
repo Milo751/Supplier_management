@@ -5,7 +5,11 @@ from app import data
 from services.governing_law_service import GoverningLaw
 
 governing_law = GoverningLaw(data)
-coordinates = governing_law.get_coordinates(governing_law.data['Governing Law'])
+unique_governing = governing_law.unique_governing_laws()
+location = governing_law.get_location(unique_governing)
 
 st.title('Analísis de leyes aplicables por zona geográfica')
-st.map(coordinates)
+
+st.write('Zonas geográficas encontradas:')
+st.dataframe(location, width=1000, height=500)
+st.map(location, latitude='Latitud', longitude='Longitud')
