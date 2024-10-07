@@ -2,7 +2,7 @@
 
 This project consists of an application developed for the management and analysis of information within data sets. It uses Pandas library for efficient manipulation and organization of data, facilitating tasks such as cleaning, transforming, and aggregating information. In addition, it integrates a language model that allows users to query relevant data.
 
-## Dataset
+## Datasets
 
 [Atticus Open Contract Dataset](https://www.kaggle.com/datasets/konradb/atticus-open-contract-dataset-aok-beta)
 
