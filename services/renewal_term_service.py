@@ -2,12 +2,12 @@ from utils.logger import Logger
 import random
 
 class RenewalTerm:
-    def __init__(self, data):
+    def __init__(self, data, columns):
         self.logger = Logger()
-        self.data = data[['Document Name', 'Renewal Term (days)']]
+        self.data = data[columns]
 
-    def count_renewal_terms(self):
-        return self.data.groupby('Renewal Term (days)').size().reset_index(name='Count')
+    def count_group_by(self, column):
+        return self.data.groupby(column).size().reset_index(name='Count')
     
     def generate_color(self, df):
         colors = ['#%06X' % random.randint(0, 0xFFFFFF) for _ in range(len(df))]

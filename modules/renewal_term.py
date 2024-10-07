@@ -4,8 +4,8 @@ from app import data
 from services.renewal_term_service import RenewalTerm
 
 # Data
-renewal_term = RenewalTerm(data)
-count = renewal_term.count_renewal_terms()
+renewal_term = RenewalTerm(data, ['Document Name', 'Renewal Term (days)'])
+count = renewal_term.count_group_by('Renewal Term (days)')
 diagram_data = count[(count['Renewal Term (days)'] != 0) & (count['Renewal Term (days)'] != 9999)]
 diagram_colors = renewal_term.generate_color(diagram_data)
 
@@ -18,7 +18,7 @@ col1.dataframe(count)
 col2.subheader('Definiciones:')
 col2.write('Cuando los días de renovación son 9999, significa que el contrato es perpetuo.')
 col2.divider()
-col2.write('Cuando los días de renovación son 0, significa que no estaba correctamente especificado.')
+col2.write('Cuando los días de renovación son 0, significa que no estaba correctamente especificado o no se logro identificar en los documentos.')
 
 st.write('Basado en los datos anteriores, se excluyeron los contratos perpetuos y los que no tenían un plazo de renovación especificado.')
 st.bar_chart(diagram_colors, x='Count', y='Renewal Term (days)', color='Color', x_label='Cantidad de contratos', y_label='Plazo de renovación (días)')

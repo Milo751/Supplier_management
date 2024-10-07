@@ -1,9 +1,9 @@
 from utils.logger import Logger
 
 class EffectiveDates:
-    def __init__(self, data):
+    def __init__(self, data, columns):
         self.logger = Logger()
-        self.data = data[['Document Name', 'Effective Date']]
+        self.data = data[columns]
         
   
 class DateInsights():
