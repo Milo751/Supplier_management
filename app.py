@@ -21,6 +21,9 @@ pages = {
         st.Page("modules/extras/notification_period.py", title="Periodo de notificación", icon=":material/notifications:"),
         st.Page("modules/extras/exclusivity.py", title="Exclusividad", icon=":material/lock:"),
     ],
+    "Modelo de lenguaje": [
+        st.Page("modules/model.py", title="BERT", icon=":material/emoji_objects:"),
+    ],
 }
 
 pg = st.navigation(pages)
