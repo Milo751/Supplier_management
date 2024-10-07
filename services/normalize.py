@@ -3,7 +3,6 @@ import pandas as pd
 
 from utils.logger import Logger
 from utils.manage_csv import PrepareData
-from utils.standardize_data import EditText
 
 class PreprocessData:
     def __init__(self):
@@ -12,11 +11,13 @@ class PreprocessData:
         
     def preprocess_data(self):
         try:
+            # Set column names
             answer_columns = [col for col in self.data.columns.tolist() if col.endswith('Answer')]
             data = self.data[answer_columns]
             non_answer_columns = [col for col in self.data.columns.tolist() if not col.endswith('Answer')]
             non_answer_columns.pop(0)
             data.columns = non_answer_columns
+            data = data.rename(columns={'Notice Period To Terminate Renewal': 'Notification Renewal'})
             preprocessed_data = NormalizeData().normalize_data(data)
             self.logger.log_info("Data preprocessed")
         except Exception as e:
@@ -29,32 +30,69 @@ class NormalizeData:
     def __init__(self):
         self.logger = Logger()
     
-    def _document_name(self, data, column='Document Name'):
-        data[column] = data[column].apply(lambda x: ' '.join(re.split(r'\s+', x.strip().lower())).capitalize())
-        data[column] = data[column].apply(lambda x: re.sub(r'agreement.*', '', x, flags=re.IGNORECASE))
-        return data
+    def _document_name(self, entries):
+        whitespace_pattern = re.compile(r'\s+')
+        agreement_pattern = re.compile(r'\bagreement\b.*', flags=re.IGNORECASE)
 
-    def _date(self, data, date_column):
-        data[date_column] = pd.to_datetime(data[date_column], errors='coerce')
-        return data
+        if not isinstance(entries, str):
+            return entries
+        entries = ' '.join(re.split(whitespace_pattern, entries.strip().lower())).capitalize()
+        cleaned_entries = re.sub(agreement_pattern, '', entries).strip()
+        return cleaned_entries
 
-    # TODO: Son líneas demasiado largas, se pueden dividir
-    def _providers(self, data, column='Parties'):
-        data[column] = data[column].apply(lambda x: re.split(';', x) if isinstance(x, str) else [])
-        data[column] = data[column].apply(lambda x: [entry if isinstance(entry, str) and not re.fullmatch(r'[\W_]+', entry) else None for entry in x])
-        data[column] = data[column].apply(lambda x: [re.sub(r'\s*\(.*?\)', '', entry.strip().lower()).capitalize() for entry in x])
-        data[column] = data[column].apply(lambda x: [EditText.clean_text_after(entry, r',.*') for entry in x])
-        data[column] = data[column].apply(lambda x: [entry for entry in x if entry and not re.compile(r'(.)\1{4,}').search(entry)])
+
+    def _dates(self, data, date_columns):
+        for date_column in date_columns:
+            data[date_column] = pd.to_datetime(data[date_column], errors='coerce')
+        return data   
+        
+    def _providers(self, entries):
+        remove_special_chars = re.compile(r'[\W_]+')
+        remove_parentheses = re.compile(r'\s*\(.*?\)')
+        remove_after_comma = re.compile(r',.*')
+        remove_repeating_chars = re.compile(r'(.)\1{4,}')
+
+        if not isinstance(entries, str):
+            return []
+        entries = re.split(';', entries)
+
+        cleaned_entries = []
+        for entry in entries:
+            if re.fullmatch(remove_special_chars, entry):
+                continue
+            entry = re.sub(remove_parentheses, '', entry.strip().lower()).capitalize()
+            entry = re.sub(remove_after_comma, '', entry)
+            if re.search(remove_repeating_chars, entry):
+                continue
+            if entry:
+                cleaned_entries.append(entry)
+        return cleaned_entries
+      
+    def _governing_law(self, entries):
+        remove_special_chars = re.compile(r'[\W_]+')
+        remove_after_comma = re.compile(r',.*')
+        split_pattern = re.compile(r';| and ')
+
+        if not isinstance(entries, str):
+            return []
+        if re.fullmatch(remove_special_chars, entries):
+            return []
+        entries = re.sub(remove_after_comma, '', entries.strip())
+        split_entries = re.split(split_pattern, entries)
+        
+        cleaned_entries = []
+        for entry in split_entries:
+            entry = entry.strip()
+            if entry:
+                cleaned_entries.append(entry)
+        return cleaned_entries
+
+    def _renewal_term(self, data, column='Renewal Term'):
+        data[column] = data[column].apply(self._count_days)
+        data = data.rename(columns={column: f'{column} (days)'})
         return data
     
-    def _governing_law(self, data, column='Governing Law'):
-        data[column] = data[column].apply(lambda x: x if isinstance(x, str) and not re.fullmatch(r'[\W_]+', x) else None)
-        data[column] = data[column].fillna('')
-        data[column] = data[column].apply(lambda x: EditText.clean_text_after(x, r',.*'))
-        data[column] = data[column].apply(lambda x: re.split(r';| and ', x) if isinstance(x, str) else [])
-        return data
-    
-    def _count_days(value):
+    def _count_days(self, value):
         if pd.isna(value) or value is None:
             return 0
         elif "perpetual" in value.lower():
@@ -70,16 +108,19 @@ class NormalizeData:
     
     def normalize_data(self, data):
         try:
-            data = NormalizeData._date(self, data, 'Effective Date')
+            data = NormalizeData._dates(self, data, ['Effective Date', 'Agreement Date', 'Expiration Date'])
             clean_data = data.dropna(subset=['Document Name','Effective Date'])
             trim_data = clean_data.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
-            preprocessed_data = NormalizeData._document_name(self, trim_data)
-            preprocessed_data = NormalizeData._date(self, preprocessed_data, 'Agreement Date')
-            preprocessed_data = NormalizeData._date(self, preprocessed_data, 'Expiration Date')
-            preprocessed_data = NormalizeData._providers(self, preprocessed_data)
-            preprocessed_data = NormalizeData._governing_law(self, preprocessed_data)
-            preprocessed_data['Renewal Term'] = preprocessed_data['Renewal Term'].apply(NormalizeData._count_days)
-            preprocessed_data = preprocessed_data.rename(columns={'Renewal Term': 'Renewal Term (days)'})
+
+            # Required data
+            trim_data['Document Name'] = trim_data['Document Name'].apply(self._document_name)
+            trim_data['Parties'] = trim_data['Parties'].apply(self._providers)
+            trim_data['Governing Law'] = trim_data['Governing Law'].apply(self._governing_law)
+            preprocessed_data = self._renewal_term(trim_data)
+
+            # Extra data
+            preprocessed_data = self._renewal_term(preprocessed_data, 'Notification Renewal')
+
             preprocessed_data.rename_axis(index='Index', inplace=True)
             self.logger.log_info("Data normalized")
         except Exception as e:
