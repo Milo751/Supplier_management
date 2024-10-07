@@ -8,6 +8,8 @@ renewal_term = RenewalTerm(data, ['Document Name', 'Renewal Term (days)'])
 count = renewal_term.count_group_by('Renewal Term (days)')
 diagram_data = count[(count['Renewal Term (days)'] != 0) & (count['Renewal Term (days)'] != 9999)]
 diagram_colors = renewal_term.generate_color(diagram_data)
+shortest = diagram_data['Renewal Term (days)'].min()
+longest = diagram_data['Renewal Term (days)'].max()
 
 # View
 st.title('Analísis de plazos de renovación')
@@ -24,5 +26,5 @@ st.write('Basado en los datos anteriores, se excluyeron los contratos perpetuos 
 st.bar_chart(diagram_colors, x='Count', y='Renewal Term (days)', color='Color', x_label='Cantidad de contratos', y_label='Plazo de renovación (días)')
 
 col1, col2 = st.columns(2)
-col1.metric(label='Plazo máximo de días para renovación', value=int(diagram_data['Renewal Term (days)'].max()))
-col2.metric(label='Plazo mínimo de días para renovación', value=int(diagram_data['Renewal Term (days)'].min()))
+col1.metric(label='Plazo máximo de días para renovación', value=int(shortest))
+col2.metric(label='Plazo mínimo de días para renovación', value=int(longest))

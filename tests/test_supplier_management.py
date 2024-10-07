@@ -100,13 +100,13 @@ def test_supplier_management():
             1: ['Rogers cable communications inc.','Euromedia holdings corp.']
         },
         "Agreement Date": {
-            1: pd.to_datetime("7/11/06")
+            1: pd.to_datetime("7/11/06", format='%m/%d/%y')
         },
         "Effective Date": {
-            1: pd.to_datetime("7/11/06")
+            1: pd.to_datetime("7/11/06", format='%m/%d/%y')
         },
         "Expiration Date": {
-            1: pd.to_datetime("6/30/10")
+            1: pd.to_datetime("6/30/10", format='%m/%d/%y')
         },
         "Renewal Term (days)": {
             1: 730
@@ -138,7 +138,7 @@ def test_supplier_management():
 
     # Test EffectiveDates
     effective_dates = EffectiveDates(df_preprocessed, ['Document Name', 'Effective Date'])
-    effective_dates.data['Effective Date'] = pd.to_datetime(effective_dates.data['Effective Date'], errors='coerce')
+    effective_dates.data.loc[:, 'Effective Date'] = pd.to_datetime(effective_dates.data['Effective Date'], errors='coerce')
 
     min_date, min_name = effective_dates.get_min_date_index('Effective Date')
     assert min_date == '11-07-2006'

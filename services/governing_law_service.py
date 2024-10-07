@@ -39,7 +39,9 @@ class GoverningLaw:
                     'Latitud': [lat],
                     'Longitud': [lng]
                 })
-                location = pd.concat([location, new_row], ignore_index=True)
+                #location = pd.concat([location, new_row], ignore_index=True)
+                if not new_row.dropna(how='all').empty:
+                    location = pd.concat([location, new_row], ignore_index=True)
             else:
                 self.logger.log_error(f"City or country {law} not found")
         return location
