@@ -5,8 +5,10 @@ from utils.logger import Logger
 from utils.manage_csv import PrepareData
 
 class PreprocessData:
-    def __init__(self):
-        self.data = PrepareData('data/master_clauses.csv').load_data()
+    def __init__(self, data=None):
+        if data is None:  
+            data = PrepareData('data/master_clauses.csv').load_data()
+        self.data = data
         self.logger = Logger()
         
     def preprocess_data(self):

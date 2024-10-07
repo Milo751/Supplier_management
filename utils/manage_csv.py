@@ -7,9 +7,9 @@ class PrepareData:
         self.file_path = file_path
         self.logger = Logger()
 
-    def load_data(self):
+    def load_data(self, na_values=None, keep_default_na=True):
         try:
-            data = pd.read_csv(self.file_path)
+            data = pd.read_csv(self.file_path, na_values=na_values, keep_default_na=keep_default_na)
             self.logger.log_info(f"Data loaded from {self.file_path}")
             return data
         except FileNotFoundError:
