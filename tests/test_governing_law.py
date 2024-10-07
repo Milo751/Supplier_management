@@ -32,7 +32,6 @@ def test_get_countries():
     # Test
     result_df = governing_law._get_countries(unique_laws)
 
-    # Ensure both DataFrames contain the same values, regardless of order
     assert result_df.sort_values(by=['Ciudad']).reset_index(drop=True).equals(
         expected_df.sort_values(by=['Ciudad']).reset_index(drop=True)
     ), "The returned DataFrame does not match the expected values."
@@ -65,11 +64,9 @@ def test_get_continents():
     # Test
     result_df = governing_law._get_continents(countries)
 
-    # Redondear columnas numéricas para evitar diferencias de precisión
     result_df[['Latitud', 'Longitud']] = result_df[['Latitud', 'Longitud']].round(4)
     expected_df[['Latitud', 'Longitud']] = expected_df[['Latitud', 'Longitud']].round(4)
 
-    # Comparar cada columna por separado
     for column in expected_df.columns:
         assert result_df[column].sort_values().reset_index(drop=True).equals(
             expected_df[column].sort_values().reset_index(drop=True)
