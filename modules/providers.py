@@ -19,3 +19,6 @@ st.dataframe(count, width=1000, height=500)
 st.write('Top 10 proveedores más populares:')
 st.bar_chart(best_ones, x='Party', y='Count', x_label='Proveedor', y_label='Cantidad de contratos')
 
+st.write('Proveedor más popular:')
+st.subheader(f'{most_popular["Party"].values[0]} con {most_popular["Count"].values[0]} contratos')
+
