@@ -1,5 +1,4 @@
 import pandas as pd
-import streamlit as st
 
 from utils.logger import Logger
 from utils.manage_csv import PrepareData

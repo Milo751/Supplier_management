@@ -1,8 +1,6 @@
 import os
 import logging
 
-from logging.handlers import RotatingFileHandler
-
 class Logger:
     def __init__(self, log_folder='logs', log_file='app.log'):
         if not os.path.exists(log_folder):

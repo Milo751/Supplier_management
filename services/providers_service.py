@@ -1,6 +1,7 @@
+import pandas as pd
+
 from utils.logger import Logger
 from collections import Counter
-import pandas as pd
 
 class Providers:
     def __init__(self, data):

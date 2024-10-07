@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 
 from app import data
 from services.providers_service import Providers
